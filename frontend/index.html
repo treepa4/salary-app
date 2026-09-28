@@ -4,81 +4,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Капуста</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+tailwind.config = {
+    theme: {
+        extend: {
+            colors: {
+                canvas: '#F8FAFC',
+                ink: '#0F172A',
+                muted: '#475569',
+                line: '#E2E8F0',
+                accent: '#0D9488',
+            },
+            fontFamily: {
+                sans: ['Inter', 'sans-serif'],
+                mono: ['JetBrains Mono', 'monospace'],
+            }
+        }
+    }
+}
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+    <style>
+        .fc .fc-toolbar-title {
+            font-family: 'Inter', sans-serif !important;
+            text-transform: uppercase;
+        }
+    </style>
+
+
 </head>
-<body>
-    <h1>shifts: </h1>
-    <form id="shift-form">
-        <input type="date" id="work-date" required>
-        <input type="number" id="hours" step="0.5" placeholder="hours" required>
-        <input type="number" id="rate" step="0.1" placeholder="rate" required>
-        <button type="submit">add shift</button>
-    </form>
+<body class="bg-canvas min-h-screen flex justify-center p-8 font-sans">
+    <div class="w-full max-w-xl bg-white border border-line rounded-xl shadow p-6">
+        <h1 class="text-xl font-semibold text-ink mb-4">shifts: </h1>
+        <form id="shift-form" class="flex flex-wrap items-end gap-2 mb-4">
+            <input type="date" id="work-date" required class="border rounded px-3 py-2 mr-2" >
+            <input type="number" id="hours" step="0.5" placeholder="hours" required class="border rounded px-3 py-2 mr-2">
+            <input type="number" id="rate" step="0.1" placeholder="rate" required class="border rounded px-3 py-2 mr-2">
+            <button type="submit" class="bg-ink text-white px-4 py-2 rounded hover:bg-blue-600">add shift</button>
+        </form>
+        <div id="calendar" class="mt-4"></div>
+        <ul id="shifts-list" class="space-y-2"></ul>
 
-    <script>
-        document.getElementById('shift-form').addEventListener('submit',function(event) {
-            event.preventDefault();
-            // console.log('ok');
-            const workDate = document.getElementById('work-date').value;
-            const hours = document.getElementById('hours').value;
-            const rate = document.getElementById('rate').value;
+        <p id="earnings" class="font-mono text-lg font-semibold text-accent bg-white border border-line rounded-lg px-4 py-3 mt-4"></p>
 
-            fetch('http://localhost:8000/shifts', {
-                method: 'POST',
-                headers: {
-                    'Content-Type' : 'application/json'
-                },
-                body: JSON.stringify({
-                    work_date: workDate,
-                    hours: parseFloat(hours),
-                    rate: parseFloat(rate)
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log("added: ", data)
-                loadShifts()  
-                loadEarnings()  
-            })
-            .catch(err => console.error("error: ", err));
-        });
-    </script>
-    <ul id="shifts-list"></ul>
-    <script>
-        function loadShifts() {
-            fetch('http://localhost:8000/shifts')
-            .then(response => response.json())
-            .then(data => {
-                const list = document.getElementById('shifts-list');
-                list.innerHTML = '';
-                data.forEach(shift => {
-                    let li = document.createElement('li');
-                    li.textContent = ` ${shift.shift_id} ;DATE: ${shift.work_date}; HOURS: ${shift.hours}; RATE: ${shift.rate}`;
-                    let button = document.createElement('button');
-                    button.textContent = 'del';
-                    button.addEventListener('click', function() {
-                        fetch(
-                            `http://localhost:8000/shifts/${shift.shift_id}`, {method: 'DELETE'}
-                        )
-                        .then(() => loadShifts());
-                    });
-                    li.appendChild(button);
-                    list.appendChild(li);
-                });
-            })
-        }
-        loadShifts()
-        loadEarnings()
-    </script>
-
-    <p id="earnings"></p>
-    <script>
-        function loadEarnings() {
-            let earn = document.getElementById('earnings');
-            fetch('http://localhost:8000/earnings')
-            .then(data => data.json())
-            .then(response => {earn.textContent = `earnings: ${response}`;});
-        }
-        loadEarnings()
-    </script>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
