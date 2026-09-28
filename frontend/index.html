@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Капуста</title>
+</head>
+<body>
+    <h1>shifts: </h1>
+    <form id="shift-form">
+        <input type="date" id="work-date" required>
+        <input type="number" id="hours" step="0.5" placeholder="hours" required>
+        <input type="number" id="rate" step="0.1" placeholder="rate" required>
+        <button type="submit">add shift</button>
+    </form>
+
+    <script>
+        document.getElementById('shift-form').addEventListener('submit',function(event) {
+            event.preventDefault();
+            // console.log('ok');
+            const workDate = document.getElementById('work-date').value;
+            const hours = document.getElementById('hours').value;
+            const rate = document.getElementById('rate').value;
+
+            fetch('http://localhost:8000/shifts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type' : 'application/json'
+                },
+                body: JSON.stringify({
+                    work_date: workDate,
+                    hours: parseFloat(hours),
+                    rate: parseFloat(rate)
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("added: ", data)
+                loadShifts()  
+                loadEarnings()  
+            })
+            .catch(err => console.error("error: ", err));
+        });
+    </script>
+    <ul id="shifts-list"></ul>
+    <script>
+        function loadShifts() {
+            fetch('http://localhost:8000/shifts')
+            .then(response => response.json())
+            .then(data => {
+                const list = document.getElementById('shifts-list');
+                list.innerHTML = '';
+                data.forEach(shift => {
+                    let li = document.createElement('li');
+                    li.textContent = ` ${shift.shift_id} ;DATE: ${shift.work_date}; HOURS: ${shift.hours}; RATE: ${shift.rate}`;
+                    let button = document.createElement('button');
+                    button.textContent = 'del';
+                    button.addEventListener('click', function() {
+                        fetch(
+                            `http://localhost:8000/shifts/${shift.shift_id}`, {method: 'DELETE'}
+                        )
+                        .then(() => loadShifts());
+                    });
+                    li.appendChild(button);
+                    list.appendChild(li);
+                });
+            })
+        }
+        loadShifts()
+        loadEarnings()
+    </script>
+
+    <p id="earnings"></p>
+    <script>
+        function loadEarnings() {
+            let earn = document.getElementById('earnings');
+            fetch('http://localhost:8000/earnings')
+            .then(data => data.json())
+            .then(response => {earn.textContent = `earnings: ${response}`;});
+        }
+        loadEarnings()
+    </script>
+</body>
+</html>

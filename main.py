@@ -4,6 +4,8 @@ from fastapi import FastAPI, Depends
 from pydantic import BaseModel
 from datetime import date
 from sqlalchemy.orm import Session
+from fastapi.middleware.cors import CORSMiddleware
+
 
 class Shift(BaseModel):
     shift_id: int
@@ -11,11 +13,24 @@ class Shift(BaseModel):
     hours: float
     rate: float
 
+class ShiftCreate(BaseModel):
+    work_date: date
+    hours: float
+    rate: float
+
+
 app = FastAPI()
 Base.metadata.create_all(bind=engine)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 @app.post("/shifts")
-def add_shift(shift: Shift, db: Session = Depends(get_db)):
+def add_shift(shift: ShiftCreate, db: Session = Depends(get_db)):
     shiftDb = ShiftDB(rate = shift.rate, work_date = shift.work_date, hours = shift.hours)
     db.add(shiftDb)
     db.commit()
