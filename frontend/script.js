@@ -6,7 +6,7 @@ document.getElementById('shift-form').addEventListener('submit',function(event) 
     const hours = document.getElementById('hours').value;
     const rate = document.getElementById('rate').value;
 
-    fetch('http://localhost:8000/shifts', {
+    fetch('/shifts', {
         method: 'POST',
         headers: {
             'Content-Type' : 'application/json'
@@ -28,7 +28,7 @@ document.getElementById('shift-form').addEventListener('submit',function(event) 
     });
 
 function loadShifts() {
-    fetch('http://localhost:8000/shifts')
+    fetch('/shifts')
     .then(response => response.json())
     .then(data => {
         const list = document.getElementById('shifts-list');
@@ -42,7 +42,7 @@ function loadShifts() {
             button.textContent = 'del';
             button.addEventListener('click', function() {
                 fetch(
-                    `http://localhost:8000/shifts/${shift.shift_id}`, {method: 'DELETE'}
+                    `/shifts/${shift.shift_id}`, {method: 'DELETE'}
                     )
                 .then(() => {
                     loadShifts()
@@ -56,9 +56,9 @@ function loadShifts() {
 loadShifts()
 function loadEarnings() {
     let earn = document.getElementById('earnings');
-    fetch('http://localhost:8000/earnings')
+    fetch('/earnings')
     .then(data => data.json())
-    .then(response => {earn.textContent = `earnings: ${response}`;});
+    .then(response => {earn.textContent = `Наработал: ${response} Рупий`;});
 }
 loadEarnings()
 
@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
         initialView: 'dayGridMonth',
         locale: 'ru',
         events: function(fetchInfo, successCallback, failureCallback) {
-            fetch('http://localhost:8000/shifts')
+            fetch('/shifts')
             .then(response => response.json())
             .then(data => {
                 const events = data.map(shift => ({
